@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detective Chat Game</title>
+    <style>
+        :root {
+            --primary-color: #8b0000;
+            --secondary-color: #2b0000;
+            --text-color: #f0e0e0;
+            --chat-bg: #1a0000;
+            --chat-sent: #4e1010;
+            --chat-received: #2e1010;
+            --highlight: #c01010;
+            --header-bg: #400000;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: black;
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .app-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            background-color: var(--secondary-color);
+        }
+        
+        .sidebar {
+            width: 30%;
+            background-color: var(--secondary-color);
+            border-right: 1px solid #3a0000;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-area {
+            width: 70%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background-color: var(--header-bg);
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #3a0000;
+        }
+        
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .game-header {
+            display: flex;
+            align-items: center;
+        }
+        
+        .header-icons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .header-icon {
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--text-color);
+        }
+        
+        .search-bar {
+            padding: 8px;
+            background-color: var(--chat-bg);
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-bar input {
+            background-color: #2a0000;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 12px;
+            color: var(--text-color);
+            width: 100%;
+            margin-left: 8px;
+        }
+        
+        .contact-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .contact {
+            display: flex;
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #2a0000;
+            transition: background-color 0.2s;
+            align-items: center;
+        }
+        
+        .contact:hover {
+            background-color: #3a0000;
+        }
+        
+        .contact.active {
+            background-color: #3a0000;
+            border-left: 3px solid var(--highlight);
+        }
+        
+        .profile-pic {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            cursor: pointer;
+            background-color: #4a0000;
+        }
+        
+        .profile-pic-sm {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            cursor: pointer;
+            background-color: #4a0000;
+        }
+        
+        .contact-info {
+            flex: 1;
+        }
+        
+        .contact-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        
+        .contact-status {
+            font-size: 0.8rem;
+            color: #b0a0a0;
+        }
+        
+        .chat-header {
+            justify-content: space-between;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            background-color: var(--chat-bg);
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 10px;
+            border-radius: 8px;
+            position: relative;
+            word-wrap: break-word;
+        }
+        
+        .message-sent {
+            background-color: var(--chat-sent);
+            align-self: flex-end;
+            border-bottom-right-radius: 0;
+        }
+        
+        .message-received {
+            background-color: var(--chat-received);
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            color: #b0a0a0;
+            text-align: right;
+            margin-top: 5px;
+        }
+        
+        .pin-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+        
+        .chat-input {
+            background-color: var(--header-bg);
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-area {
+            flex: 1;
+            background-color: #2a0000;
+            border-radius: 20px;
+            padding: 10px 15px;
+            color: var(--text-color);
+            border: none;
+            outline: none;
+        }
+        
+        .send-btn {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .send-btn:hover {
+            background-color: var(--highlight);
+        }
+        
+        .settings-panel, .case-panel, .character-panel, .evidence-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--secondary-color);
+            z-index: 10;
+            display: none;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .panel-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--highlight);
+            padding-bottom: 10px;
+        }
+        
+        .back-btn {
+            margin-right: 10px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        h2 {
+            color: var(--text-color);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            background-color: #2a0000;
+            border: 1px solid #4a0000;
+            border-radius: 4px;
+            color: var(--text-color);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            background-color: var(--highlight);
+        }
+        
+        .btn-secondary {
+            background-color: #4a0000;
+        }
+        
+        .character-list, .evidence-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .character-item, .evidence-item {
+            background-color: #2a0000;
+            padding: 10px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .character-item .character-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .character-actions, .evidence-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .action-btn:hover {
+            color: var(--highlight);
+        }
+        
+        .character-details {
+            flex: 1;
+            margin-left: 10px;
+        }
+        
+        .timer-container {
+            text-align: center;
+            background-color: var(--chat-bg);
+            padding: 5px;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        
+        .timer {
+            font-weight: bold;
+            color: var(--highlight);
+        }
+        
+        .story-container {
+            background-color: #2a0000;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .story-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .read-more {
+            color: var(--highlight);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        .full-story {
+            display: none;
+        }
+        
+        .questions-counter {
+            font-size: 0.8rem;
+            background-color: var(--primary-color);
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 10px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: var(--secondary-color);
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 80%;
+            max-height: 80%;
+            overflow: auto;
+        }
+        
+        .close-modal {
+            color: var(--text-color);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close-modal:hover {
+            color: var(--highlight);
+        }
+        
+        .modal-image {
+            max-width: 100%;
+            max-height: 70vh;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .evidence-thumbnail {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #4a0000;
+        }
+        
+        .game-over-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: var(--text-color);
+            text-align: center;
+        }
+        
+        .game-over-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--highlight);
+        }
+        
+        .game-over-message {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--highlight);
+            border-radius: 50%;
+            animation: confetti-fall 3s linear infinite;
+        }
+        
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            margin-left: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .typing-indicator.visible {
+            opacity: 1;
+        }
+        
+        .typing-dot {
+            height: 8px;
+            width: 8px;
+            margin: 0 1px;
+            background-color: var(--text-color);
+            border-radius: 50%;
+            display: inline-block;
+            animation: typing-dot 1.4s infinite ease-in-out both;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing-dot {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        .accusation-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--header-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 50;
+        }
+        
+        .accusation-title {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .evidence-board {
+            background-color: var(--header-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .evidence-board-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .evidence-entry {
+            background-color: #2a0000;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="header sidebar-header">
+                <h2>Detective</h2>
+                <div class="header-icons">
+                    <div class="header-icon" id="settingsBtn">⚙️</div>
+                    <div class="header-icon" id="newCaseBtn">📝</div>
+                </div>
+            </div>
+            <div class="search-bar">
+                <span>🔍</span>
+                <input type="text" placeholder="Search or start new chat" id="searchContacts">
+            </div>
+            <div class="contact-list" id="contactList">
+                <!-- Contacts will be populated dynamically -->
+            </div>
+            <div class="evidence-board" id="evidenceBoard">
+                <div class="evidence-board-title">Evidence Board</div>
+                <div id="evidenceEntries"></div>
+            </div>
+        </div>
+        
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="header chat-header" id="chatHeader">
+                <div class="game-header">
+                    <img src="/api/placeholder/100/100" class="profile-pic-sm active-contact-pic" alt="Contact">
+                    <div>
+                        <div class="contact-name active-contact-name">Select a contact</div>
+                        <div class="questions-counter">0/10 questions</div>
+                    </div>
+                </div>
+                <div class="header-icons">
+                    <div class="header-icon view-evidence-btn" style="display: none;">🔍</div>
+                    <div class="header-icon accusation-btn" style="display: none;">❗</div>
+                    <div class="header-icon hint-btn" style="display: none;">💡</div>
+                </div>
+            </div>
+            
+            <div class="story-container" style="display: none;">
+                <div class="story-title">Case Description:</div>
+                <div class="story-summary"></div>
+                <div class="read-more">Read more</div>
+                <div class="full-story"></div>
+            </div>
+            
+            <div class="timer-container" style="display: none;">
+                Time remaining: <span class="timer">30:00</span>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message message-received">
+                    Select a contact to start chatting.
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <input type="text" class="input-area" id="messageInput" placeholder="Type a message" disabled>
+                <button class="send-btn" id="sendBtn" disabled>➤</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Panel -->
+    <div class="settings-panel">
+        <div class="panel-header">
+            <button class="back-btn">←</button>
+            <h2>Settings</h2>
+        </div>
+        
+        <div class="form-group">
+            <button class="btn" id="createCaseBtn">Create New Case</button>
+        </div>
+        
+        <div class="form-group">
+            <button class="btn btn-secondary" id="manageCasesBtn">Manage Cases</button>
+        </div>
+        
+        <div class="form-group">
+            <button class="btn btn-secondary" id="tutorialBtn">Play Tutorial Case</button>
+        </div>
+        
+        <div class="form-group">
+            <label for="apiKeyInput">Hugging Face API Key (Optional)</label>
+            <input type="password" id="apiKeyInput" placeholder="Enter your API key">
+            <button class="btn" id="saveApiKeyBtn" style="margin-top: 10px;">Save API Key</button>
+        </div>
+        
+        <div class="form-group">
+            <label for="groqApiKeyInput">Groq API Token</label>
+            <input type="password" id="groqApiKeyInput" placeholder="Enter your Groq API token">
+            <button class="btn" id="saveGroqApiKeyBtn" style="margin-top: 10px;">Save API Token</button>
+        </div>
+    </div>
+    
+    <!-- Case Creation Panel -->
+    <div class="case-panel">
+        <div class="panel-header">
+            <button class="back-btn">←</button>
+            <h2>Create New Case</h2>
+        </div>
+        
+        <div class="form-group">
+            <label for="caseTitleInput">Case Title</label>
+            <input type="text" id="caseTitleInput" placeholder="Enter case title">
+        </div>
+        
+        <div class="form-group">
+            <label for="caseDescriptionInput">Case Description</label>
+            <textarea id="caseDescriptionInput" placeholder="Enter the full story of what happened..."></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="caseSummaryInput">Case Summary (shown initially)</label>
+            <textarea id="caseSummaryInput" placeholder="A short summary that players see first..."></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="caseSolutionInput">Case Solution (who did it, motive, method)</label>
+            <textarea id="caseSolutionInput" placeholder="The correct solution including culprit(s), motive, and method..."></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="difficultySelect">Difficulty Level</label>
+            <select id="difficultySelect">
+                <option value="easy">Easy (30 min, 15 questions)</option>
+                <option value="medium">Medium (20 min, 10 questions)</option>
+                <option value="hard">Hard (15 min, 5 questions)</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="campaignSelect">Campaign Story</label>
+            <select id="campaignSelect">
+                <option value="none">Standalone Case</option>
+                <option value="campaign1">Campaign: The Crimson Conspiracy</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Characters</label>
+            <div class="character-list" id="caseCharacterList">
+                <!-- Characters will be added here -->
+            </div>
+            <button class="btn btn-secondary" id="addCharacterBtn">Add Character</button>
+        </div>
+        
+        <div class="form-group">
+            <label>Evidence</label>
+            <div class="evidence-list" id="caseEvidenceList">
+                <!-- Evidence will be added here -->
+            </div>
+            <button class="btn btn-secondary" id="addEvidenceBtn">Add Evidence</button>
+        </div>
+        
+        <div class="form-group">
+            <button class="btn" id="saveCaseBtn">Save Case</button>
+        </div>
+    </div>
+    
+    <!-- Character Creation Panel -->
+    <div class="character-panel">
+        <div class="panel-header">
+            <button class="back-btn">←</button>
+            <h2>Create Character</h2>
+        </div>
+        
+        <div class="form-group">
+            <label for="characterNameInput">Character Name</label>
+            <input type="text" id="characterNameInput" placeholder="Enter character name">
+        </div>
+        
+        <div class="form-group">
+            <label for="characterRoleInput">Role</label>
+            <select id="characterRoleInput">
+                <option value="suspect">Suspect</option>
+                <option value="witness">Witness</option>
+                <option value="detective">Detective/Police</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="characterCulpritInput">Is Culprit?</label>
+            <select id="characterCulpritInput">
+                <option value="false">No</option>
+                <option value="true">Yes</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="characterProfilePicInput">Profile Picture URL</label>
+            <input type="text" id="characterProfilePicInput" placeholder="Enter URL or leave blank for default">
+            <small style="color: #b0a0a0;">Tip: Use a square image centered on the face for best results.</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="characterBackstoryInput">Backstory & Knowledge</label>
+            <textarea id="characterBackstoryInput" placeholder="Enter the character's backstory, knowledge, and how they should respond..."></textarea>
+        </div>
+        
+        <div class="form-group">
+            <button class="btn" id="saveCharacterBtn">Save Character</button>
+        </div>
+    </div>
+    
+    <!-- Modal for displaying images -->
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <span class="close-modal">×</span>
+            <img class="modal-image" id="modalImage" src="" alt="Evidence">
+            <div id="modalCaption" style="margin-top: 10px; text-align: center;"></div>
+        </div>
+    </div>
+    
+    <!-- Game Over Screen -->
+    <div class="game-over-screen" id="gameOverScreen">
+        <h1 class="game-over-title">Game Over</h1>
+        <p class="game-over-message" id="gameOverMessage"></p>
+        <div id="scoreDisplay"></div>
+        <div class="leaderboard" id="leaderboard"></div>
+        <button class="btn" id="restartGameBtn">Start New Game</button>
+    </div>
+    
+    <!-- Accusation Panel -->
+    <div class="accusation-panel" style="display: none;">
+        <div class="accusation-title">Make Your Accusation</div>
+        <div class="form-group">
+            <label for="accusationSelect">Who do you think is guilty?</label>
+            <select id="accusationSelect"></select>
+        </div>
+        <div class="form-group">
+            <label for="accusationMotiveInput">Motive</label>
+            <textarea id="accusationMotiveInput" placeholder="What was their motive?"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="accusationMethodInput">Method</label>
+            <textarea id="accusationMethodInput" placeholder="How did they do it?"></textarea>
+        </div>
+        <button class="btn" id="submitAccusationBtn">Submit Accusation</button>
+        <button class="btn btn-secondary" id="cancelAccusationBtn" style="margin-left: 10px;">Cancel</button>
+    </div>
+
+    <script>
+        // Global variables
+        let currentCase = null;
+        let activeCharacter = null;
+        let questionCounts = {};
+        let timer = null;
+        let remainingTime = 30 * 60; // Default 30 minutes
+        let maxQuestions = 10; // Default
+        let isGameActive = false;
+        let editingCharacterIndex = -1;
+        let characters = [];
+        let evidences = [];
+        let savedCases = [];
+        let evidenceBoardEntries = [];
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+        let campaignProgress = JSON.parse(localStorage.getItem('campaignProgress')) || {};
+        let chatHistories = {}; // Preserve chat history
+        let characterConversations = {}; // Preserve conversation history for AI context
+        
+        // DOM Elements
+        const contactList = document.getElementById('contactList');
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsPanel = document.querySelector('.settings-panel');
+        const casePanel = document.querySelector('.case-panel');
+        const characterPanel = document.querySelector('.character-panel');
+        const imageModal = document.getElementById('imageModal');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const accusationPanel = document.querySelector('.accusation-panel');
+        const evidenceBoard = document.getElementById('evidenceBoard');
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedData();
+            setupEventListeners();
+        });
+        
+        function loadSavedData() {
+            const savedApiKey = localStorage.getItem('apiKey');
+            if (savedApiKey) {
+                document.getElementById('apiKeyInput').value = savedApiKey;
+            }
+            
+            const savedGroqApiKey = localStorage.getItem('groqApiKey');
+            if (savedGroqApiKey) {
+                document.getElementById('groqApiKeyInput').value = savedGroqApiKey;
+            }
+            
+            const savedCasesJson = localStorage.getItem('savedCases');
+            if (savedCasesJson) {
+                savedCases = JSON.parse(savedCasesJson);
+            }
+        }
+        
+        function setupEventListeners() {
+            settingsBtn.addEventListener('click', function() {
+                settingsPanel.style.display = 'block';
+            });
+            
+            document.getElementById('newCaseBtn').addEventListener('click', showCasePanel);
+            document.getElementById('createCaseBtn').addEventListener('click', showCasePanel);
+            
+            document.getElementById('saveApiKeyBtn').addEventListener('click', function() {
+                const newApiKey = document.getElementById('apiKeyInput').value.trim();
+                if (newApiKey) {
+                    localStorage.setItem('apiKey', newApiKey);
+                    alert('Hugging Face API key saved successfully!');
+                }
+            });
+            
+            document.getElementById('saveGroqApiKeyBtn').addEventListener('click', function() {
+                const newApiKey = document.getElementById('groqApiKeyInput').value.trim();
+                if (newApiKey) {
+                    localStorage.setItem('groqApiKey', newApiKey);
+                    alert('Groq API token saved successfully!');
+                }
+            });
+            
+            document.getElementById('tutorialBtn').addEventListener('click', loadTutorialCase);
+            
+            document.getElementById('addCharacterBtn').addEventListener('click', function() {
+                editingCharacterIndex = -1;
+                showCharacterPanel();
+            });
+            
+            document.getElementById('addEvidenceBtn').addEventListener('click', showEvidenceModal);
+            document.getElementById('saveCaseBtn').addEventListener('click', saveCase);
+            
+            document.getElementById('saveCharacterBtn').addEventListener('click', saveCharacter);
+            
+            document.querySelectorAll('.back-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const panel = this.closest('.settings-panel, .case-panel, .character-panel');
+                    panel.style.display = 'none';
+                    if (panel.classList.contains('character-panel')) {
+                        casePanel.style.display = 'block';
+                    } else if (panel.classList.contains('case-panel')) {
+                        settingsPanel.style.display = 'block';
+                    }
+                });
+            });
+            
+            sendBtn.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') sendMessage();
+            });
+            
+            document.getElementById('searchContacts').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const contacts = contactList.querySelectorAll('.contact');
+                contacts.forEach(contact => {
+                    const name = contact.querySelector('.contact-name').textContent.toLowerCase();
+                    contact.style.display = name.includes(searchTerm) ? 'flex' : 'none';
+                });
+            });
+            
+            document.querySelector('.close-modal').addEventListener('click', function() {
+                imageModal.style.display = 'none';
+            });
+            
+            document.querySelector('.read-more').addEventListener('click', function() {
+                const fullStory = document.querySelector('.full-story');
+                fullStory.style.display = fullStory.style.display === 'block' ? 'none' : 'block';
+                this.textContent = fullStory.style.display === 'block' ? 'Read less' : 'Read more';
+            });
+            
+            document.querySelector('.accusation-btn').addEventListener('click', showAccusationPanel);
+            document.getElementById('submitAccusationBtn').addEventListener('click', submitAccusation);
+            document.getElementById('cancelAccusationBtn').addEventListener('click', function() {
+                accusationPanel.style.display = 'none';
+            });
+            
+            document.querySelector('.hint-btn').addEventListener('click', requestHint);
+            
+            document.getElementById('restartGameBtn').addEventListener('click', function() {
+                gameOverScreen.style.display = 'none';
+                showCasePanel();
+            });
+            
+            document.querySelector('.view-evidence-btn').addEventListener('click', showEvidenceGallery);
+            
+            window.addEventListener('click', function(event) {
+                if (event.target === imageModal) imageModal.style.display = 'none';
+            });
+        }
+        
+        function showCasePanel() {
+            settingsPanel.style.display = 'none';
+            casePanel.style.display = 'block';
+            resetCaseForm();
+        }
+        
+        function resetCaseForm() {
+            document.getElementById('caseTitleInput').value = '';
+            document.getElementById('caseDescriptionInput').value = '';
+            document.getElementById('caseSummaryInput').value = '';
+            document.getElementById('caseSolutionInput').value = '';
+            document.getElementById('difficultySelect').value = 'medium';
+            document.getElementById('campaignSelect').value = 'none';
+            characters = [];
+            evidences = [];
+            updateCharacterList();
+            updateEvidenceList();
+        }
+        
+        function showCharacterPanel() {
+            casePanel.style.display = 'none';
+            characterPanel.style.display = 'block';
+            
+            if (editingCharacterIndex === -1) {
+                document.getElementById('characterNameInput').value = '';
+                document.getElementById('characterRoleInput').value = 'suspect';
+                document.getElementById('characterCulpritInput').value = 'false';
+                document.getElementById('characterProfilePicInput').value = '';
+                document.getElementById('characterBackstoryInput').value = '';
+            } else {
+                const character = characters[editingCharacterIndex];
+                document.getElementById('characterNameInput').value = character.name;
+                document.getElementById('characterRoleInput').value = character.role;
+                document.getElementById('characterCulpritInput').value = character.isCulprit.toString();
+                document.getElementById('characterProfilePicInput').value = character.profilePic || '';
+                document.getElementById('characterBackstoryInput').value = character.backstory;
+            }
+        }
+        
+        function saveCharacter() {
+            const name = document.getElementById('characterNameInput').value.trim();
+            const role = document.getElementById('characterRoleInput').value;
+            const isCulprit = document.getElementById('characterCulpritInput').value === 'true';
+            const profilePic = document.getElementById('characterProfilePicInput').value.trim() || '';
+            const backstory = document.getElementById('characterBackstoryInput').value.trim();
+            
+            if (!name || !backstory) {
+                alert('Please fill in the name and backstory fields.');
+                return;
+            }
+            
+            const character = { name, role, isCulprit, profilePic, backstory };
+            if (editingCharacterIndex === -1) {
+                characters.push(character);
+            } else {
+                characters[editingCharacterIndex] = character;
+            }
+            
+            updateCharacterList();
+            characterPanel.style.display = 'none';
+            casePanel.style.display = 'block';
+        }
+        
+        function updateCharacterList() {
+            const characterList = document.getElementById('caseCharacterList');
+            characterList.innerHTML = '';
+            
+            characters.forEach((character, index) => {
+                const characterItem = document.createElement('div');
+                characterItem.className = 'character-item';
+                characterItem.innerHTML = `
+                    <div class="character-info">
+                        <img src="${character.profilePic || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=='}" class="profile-pic-sm" alt="${character.name}">
+                        <div class="character-details">
+                            <div class="contact-name">${character.name}</div>
+                            <div class="contact-status">${character.role}${character.isCulprit ? ' (Culprit)' : ''}</div>
+                        </div>
+                    </div>
+                    <div class="character-actions">
+                        <button class="action-btn edit-character" data-index="${index}">✏️</button>
+                        <button class="action-btn delete-character" data-index="${index}">🗑️</button>
+                    </div>
+                `;
+                characterList.appendChild(characterItem);
+            });
+            
+            document.querySelectorAll('.edit-character').forEach(button => {
+                button.addEventListener('click', function() {
+                    editingCharacterIndex = parseInt(this.getAttribute('data-index'));
+                    showCharacterPanel();
+                });
+            });
+            
+            document.querySelectorAll('.delete-character').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    if (confirm(`Delete ${characters[index].name}?`)) {
+                        characters.splice(index, 1);
+                        updateCharacterList();
+                    }
+                });
+            });
+        }
+        
+        function showEvidenceModal() {
+            const evidenceName = prompt('Enter evidence name:');
+            if (!evidenceName) return;
+            
+            const evidenceDescription = prompt('Enter evidence description:');
+            if (!evidenceDescription) return;
+            
+            const evidenceImage = prompt('Enter evidence image URL (or leave blank for default):') || '';
+            
+            evidences.push({ name: evidenceName, description: evidenceDescription, image: evidenceImage });
+            updateEvidenceList();
+        }
+        
+        function updateEvidenceList() {
+            const evidenceList = document.getElementById('caseEvidenceList');
+            evidenceList.innerHTML = '';
+            
+            evidences.forEach((evidence, index) => {
+                const evidenceItem = document.createElement('div');
+                evidenceItem.className = 'evidence-item';
+                evidenceItem.innerHTML = `
+                    <div class="character-info">
+                        <img src="${evidence.image || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=='}" class="evidence-thumbnail" alt="${evidence.name}">
+                        <div class="character-details">
+                            <div class="contact-name">${evidence.name}</div>
+                            <div class="contact-status">${evidence.description.substring(0, 50)}${evidence.description.length > 50 ? '...' : ''}</div>
+                        </div>
+                    </div>
+                    <div class="evidence-actions">
+                        <button class="action-btn view-evidence" data-index="${index}">👁️</button>
+                        <button class="action-btn delete-evidence" data-index="${index}">🗑️</button>
+                    </div>
+                `;
+                evidenceList.appendChild(evidenceItem);
+            });
+            
+            document.querySelectorAll('.view-evidence').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    const evidence = evidences[index];
+                    document.getElementById('modalImage').src = evidence.image || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==';
+                    document.getElementById('modalCaption').textContent = `${evidence.name}: ${evidence.description}`;
+                    imageModal.style.display = 'flex';
+                });
+            });
+            
+            document.querySelectorAll('.delete-evidence').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    if (confirm('Delete this evidence?')) {
+                        evidences.splice(index, 1);
+                        updateEvidenceList();
+                    }
+                });
+            });
+        }
+        
+        function saveCase() {
+            const title = document.getElementById('caseTitleInput').value.trim();
+            const description = document.getElementById('caseDescriptionInput').value.trim();
+            const summary = document.getElementById('caseSummaryInput').value.trim();
+            const solution = document.getElementById('caseSolutionInput').value.trim();
+            const difficulty = document.getElementById('difficultySelect').value;
+            const campaign = document.getElementById('campaignSelect').value;
+            
+            if (!title || !description || !summary || !solution) {
+                alert('Please fill in all case details.');
+                return;
+            }
+            
+            if (characters.length < 2) {
+                alert('Add at least two characters.');
+                return;
+            }
+            
+            const hasCulprit = characters.some(char => char.isCulprit);
+            if (!hasCulprit) {
+                alert('Mark at least one character as the culprit.');
+                return;
+            }
+            
+            const difficultySettings = {
+                easy: { time: 30 * 60, questions: 15 },
+                medium: { time: 20 * 60, questions: 10 },
+                hard: { time: 15 * 60, questions: 5 }
+            };
+            
+            const newCase = {
+                id: Date.now().toString(),
+                title,
+                description,
+                summary,
+                solution,
+                characters: [...characters],
+                evidences: [...evidences],
+                difficulty,
+                timeLimit: difficultySettings[difficulty].time,
+                maxQuestions: difficultySettings[difficulty].questions,
+                campaign,
+                createdAt: new Date().toISOString()
+            };
+            
+            savedCases.push(newCase);
+            localStorage.setItem('savedCases', JSON.stringify(savedCases));
+            
+            alert('Case saved!');
+            casePanel.style.display = 'none';
+            startGame(newCase);
+        }
+        
+        function startGame(caseData) {
+            currentCase = caseData;
+            isGameActive = true;
+            questionCounts = {};
+            remainingTime = caseData.timeLimit;
+            maxQuestions = caseData.maxQuestions;
+            evidenceBoardEntries = [];
+            chatHistories = {};
+            characterConversations = {};
+            
+            // Initialize conversation history for each character
+            currentCase.characters.forEach(character => {
+                characterConversations[character.name] = [
+                    { 
+                        role: 'system', 
+                        content: `You are ${character.name}, a ${character.role} in a detective game.\nBackstory and knowledge: ${character.backstory}\nCase: ${currentCase.description}\n${character.isCulprit ? 'You are the culprit. You must hide this fact subtly, using evasions or misleading information (e.g., false accusations), but without lying outright.' : 'You are not the culprit, but you may have useful information or red herrings based on your knowledge.'}\nRespond to the player's message concisely in 1-3 sentences.` 
+                    }
+                ];
+            });
+            
+            contactList.innerHTML = '';
+            chatMessages.innerHTML = '';
+            updateEvidenceBoard();
+            
+            currentCase.characters.forEach(character => {
+                const contactElement = document.createElement('div');
+                contactElement.className = 'contact';
+                contactElement.innerHTML = `
+                    <img src="${character.profilePic || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=='}" class="profile-pic" alt="${character.name}">
+                    <div class="contact-info">
+                        <div class="contact-name">${character.name}</div>
+                        <div class="contact-status">${character.role}</div>
+                    </div>
+                `;
+                contactElement.addEventListener('click', () => openChat(character));
+                contactList.appendChild(contactElement);
+                questionCounts[character.name] = 0;
+            });
+            
+            document.querySelector('.story-container').style.display = 'block';
+            document.querySelector('.story-summary').textContent = currentCase.summary;
+            document.querySelector('.full-story').textContent = currentCase.description;
+            
+            document.querySelector('.timer-container').style.display = 'block';
+            document.querySelector('.accusation-btn').style.display = 'block';
+            document.querySelector('.view-evidence-btn').style.display = currentCase.evidences.length > 0 ? 'block' : 'none';
+            document.querySelector('.hint-btn').style.display = 'block';
+            evidenceBoard.style.display = 'block';
+            
+            updateTimer();
+            if (timer) clearInterval(timer);
+            timer = setInterval(updateTimer, 1000);
+        }
+        
+        function openChat(character) {
+            activeCharacter = character;
+            document.querySelector('.active-contact-pic').src = character.profilePic || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==';
+            document.querySelector('.active-contact-name').textContent = character.name;
+            document.querySelector('.questions-counter').textContent = `${questionCounts[character.name]}/${maxQuestions} questions`;
+            
+            if (chatHistories[character.name]) {
+                chatMessages.innerHTML = chatHistories[character.name];
+            } else {
+                chatMessages.innerHTML = '';
+                addMessage(`Hello, I'm ${character.name}. How can I assist your investigation?`, 'received');
+            }
+            
+            messageInput.disabled = false;
+            sendBtn.disabled = false;
+        }
+        
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || !activeCharacter) return;
+            
+            if (questionCounts[activeCharacter.name] >= maxQuestions) {
+                alert('You’ve reached the question limit for this character.');
+                return;
+            }
+            
+            addMessage(message, 'sent', true);
+            messageInput.value = '';
+            questionCounts[activeCharacter.name]++;
+            document.querySelector('.questions-counter').textContent = `${questionCounts[activeCharacter.name]}/${maxQuestions} questions`;
+            
+            // Add user's message to conversation history
+            characterConversations[activeCharacter.name].push({ role: 'user', content: message });
+            
+            showTypingIndicator(true);
+            generateResponse(activeCharacter)
+                .then(response => {
+                    showTypingIndicator(false);
+                    addMessage(response, 'received', true);
+                    // Add assistant's response to conversation history
+                    characterConversations[activeCharacter.name].push({ role: 'assistant', content: response });
+                })
+                .catch(error => {
+                    showTypingIndicator(false);
+                    console.error('Error:', error);
+                    addMessage('I can’t respond right now. Try again.', 'received');
+                });
+        }
+        
+        function addMessage(content, type, pinnable = false) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `message message-${type}`;
+            
+            const messageText = document.createElement('div');
+            messageText.textContent = content;
+            
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            const now = new Date();
+            messageTime.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            messageElement.appendChild(messageText);
+            messageElement.appendChild(messageTime);
+            
+            if (pinnable) {
+                const pinBtn = document.createElement('button');
+                pinBtn.className = 'pin-btn';
+                pinBtn.textContent = '📌 Pin';
+                pinBtn.addEventListener('click', () => pinToEvidenceBoard(content));
+                messageElement.appendChild(pinBtn);
+            }
+            
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Save history
+            if (activeCharacter) {
+                chatHistories[activeCharacter.name] = chatMessages.innerHTML;
+            }
+        }
+        
+        async function generateResponse(character) {
+            let groqApiKey = localStorage.getItem('groqApiKey');
+            if (!groqApiKey) {
+                groqApiKey = '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'; // Fallback token
+            }
+            
+            const messages = characterConversations[character.name];
+            
+            try {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${groqApiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: 'llama-3.3-70b-versatile',
+                        messages: messages,
+                        temperature: 0.6,
+                        max_tokens: 150,
+                        top_p: 0.95,
+                        stream: false
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (data.choices && data.choices.length > 0) {
+                    let aiResponse = data.choices[0].message.content.trim();
+                    const sentences = aiResponse.split(/[.!?]+/).filter(s => s.trim());
+                    aiResponse = sentences.slice(0, 3).join('. ') + (sentences.length > 0 ? '.' : '');
+                    return aiResponse;
+                } else {
+                    throw new Error('No response from API');
+                }
+            } catch (error) {
+                console.error('Groq API Error:', error);
+                return 'I’m having trouble responding right now.';
+            }
+        }
+        
+        function showTypingIndicator(show) {
+            if (show) {
+                const indicator = document.createElement('div');
+                indicator.className = 'message message-received typing-indicator-container';
+                const typingIndicator = document.createElement('div');
+                typingIndicator.className = 'typing-indicator visible';
+                for (let i = 0; i < 3; i++) {
+                    const dot = document.createElement('span');
+                    dot.className = 'typing-dot';
+                    typingIndicator.appendChild(dot);
+                }
+                indicator.appendChild(typingIndicator);
+                chatMessages.appendChild(indicator);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } else {
+                const indicator = chatMessages.querySelector('.typing-indicator-container');
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+        }
+        
+        function updateTimer() {
+            remainingTime--;
+            const minutes = Math.floor(remainingTime / 60);
+            const seconds = remainingTime % 60;
+            document.querySelector('.timer').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (remainingTime <= 0) {
+                clearInterval(timer);
+                endGame(false, 'Time’s up! You didn’t solve the case.');
+            }
+        }
+        
+        function showAccusationPanel() {
+            const accusationSelect = document.getElementById('accusationSelect');
+            accusationSelect.innerHTML = '';
+            currentCase.characters.forEach(character => {
+                const option = document.createElement('option');
+                option.value = character.name;
+                option.textContent = character.name;
+                accusationSelect.appendChild(option);
+            });
+            
+            document.getElementById('accusationMotiveInput').value = '';
+            document.getElementById('accusationMethodInput').value = '';
+            accusationPanel.style.display = 'block';
+        }
+        
+        function submitAccusation() {
+            const accusedName = document.getElementById('accusationSelect').value;
+            const motive = document.getElementById('accusationMotiveInput').value.trim();
+            const method = document.getElementById('accusationMethodInput').value.trim();
+            
+            if (!motive || !method) {
+                alert('Please provide motive and method.');
+                return;
+            }
+            
+            const accused = currentCase.characters.find(char => char.name === accusedName);
+            const culprits = currentCase.characters.filter(char => char.isCulprit).map(char => char.name);
+            const solutionLower = currentCase.solution.toLowerCase();
+            const playerSolution = `${accusedName} - Motive: ${motive} - Method: ${method}`.toLowerCase();
+            
+            let success = accused.isCulprit && solutionLower.includes(motive.toLowerCase()) && solutionLower.includes(method.toLowerCase());
+            
+            if (culprits.length > 1) {
+                success = success && confirm('Are there more culprits? (Multiple culprits detected)');
+            }
+            
+            const score = calculateScore();
+            endGame(success, success ? `Congratulations! You solved the case!` : `Wrong! The case remains unsolved. Culprit(s): ${culprits.join(', ')}`, score);
+            accusationPanel.style.display = 'none';
+        }
+        
+        function calculateScore() {
+            const totalQuestionsUsed = Object.values(questionCounts).reduce((a, b) => a + b, 0);
+            const timeUsed = currentCase.timeLimit - remainingTime;
+            const maxScore = 1000;
+            const questionPenalty = (totalQuestionsUsed / (currentCase.characters.length * maxQuestions)) * 500;
+            const timePenalty = (timeUsed / currentCase.timeLimit) * 500;
+            return Math.max(0, Math.round(maxScore - questionPenalty - timePenalty));
+        }
+        
+        function endGame(success, message, score = 0) {
+            isGameActive = false;
+            clearInterval(timer);
+            
+            document.getElementById('gameOverMessage').textContent = message;
+            document.getElementById('scoreDisplay').textContent = `Score: ${score}`;
+            updateLeaderboard(score);
+            
+            gameOverScreen.style.display = 'flex';
+            if (success) createConfetti();
+            
+            if (success && currentCase.campaign !== 'none') {
+                campaignProgress[currentCase.campaign] = (campaignProgress[currentCase.campaign] || 0) + 1;
+                localStorage.setItem('campaignProgress', JSON.stringify(campaignProgress));
+            }
+        }
+        
+        function createConfetti() {
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.animationDelay = Math.random() * 3 + 's';
+                confetti.style.backgroundColor = ['#ff0000', '#ffa500', '#ffff00', '#008000', '#0000ff'][Math.floor(Math.random() * 5)];
+                gameOverScreen.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+        
+        function updateLeaderboard(score) {
+            if (score > 0) {
+                leaderboard.push({ name: prompt('Enter your name for the leaderboard:') || 'Anonymous', score, date: new Date().toISOString() });
+                leaderboard.sort((a, b) => b.score - a.score);
+                leaderboard = leaderboard.slice(0, 5);
+                localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            }
+            
+            const leaderboardDiv = document.getElementById('leaderboard');
+            leaderboardDiv.innerHTML = '<h3>Leaderboard</h3>' + leaderboard.map(entry => `
+                <div class="leaderboard-entry">
+                    <span>${entry.name}</span>
+                    <span>${entry.score}</span>
+                </div>
+            `).join('');
+        }
+        
+        function pinToEvidenceBoard(content) {
+            evidenceBoardEntries.push(content);
+            updateEvidenceBoard();
+        }
+        
+        function updateEvidenceBoard() {
+            const entriesDiv = document.getElementById('evidenceEntries');
+            entriesDiv.innerHTML = evidenceBoardEntries.map(entry => `
+                <div class="evidence-entry">${entry}</div>
+            `).join('');
+        }
+        
+        function showEvidenceGallery() {
+            const modalContent = document.querySelector('.modal-content');
+            modalContent.innerHTML = `
+                <span class="close-modal">×</span>
+                <h2 style="margin-bottom: 15px; text-align: center;">Case Evidence</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+                    ${currentCase.evidences.map(evidence => `
+                        <div style="background-color: #2a0000; padding: 10px; border-radius: 4px; cursor: pointer;" class="evidence-gallery-item" data-name="${evidence.name}" data-description="${evidence.description}" data-image="${evidence.image}">
+                            <img src="${evidence.image || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=='}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;">
+                            <div style="font-weight: bold;">${evidence.name}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            document.querySelectorAll('.evidence-gallery-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const name = this.getAttribute('data-name');
+                    const description = this.getAttribute('data-description');
+                    const image = this.getAttribute('data-image');
+                    document.getElementById('modalImage').src = image || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==';
+                    document.getElementById('modalCaption').textContent = `${name}: ${description}`;
+                });
+            });
+            
+            document.querySelector('.close-modal').addEventListener('click', () => imageModal.style.display = 'none');
+            imageModal.style.display = 'flex';
+        }
+        
+        function requestHint() {
+            if (remainingTime < 300) {
+                alert('Not enough time for a hint.');
+                return;
+            }
+            
+            remainingTime -= 300; // Deduct 5 minutes
+            updateTimer();
+            const hint = currentCase.solution.split('.')[0]; // First sentence as hint
+            addMessage(`Hint: ${hint}`, 'received');
+        }
+        
+        function loadTutorialCase() {
+            const tutorialCase = {
+                id: 'tutorial',
+                title: 'The Missing Necklace',
+                description: 'A priceless necklace has vanished from Lady Margaret’s mansion during a dinner party. The guests were Lord Henry (a cunning noble), Alice (the maid), and Dr. Watson (a family friend). Investigate to find out who took it.',
+                summary: 'A necklace went missing during a dinner party at Lady Margaret’s mansion.',
+                solution: 'Lord Henry stole the necklace to pay off gambling debts, slipping it into his coat pocket during dessert.',
+                characters: [
+                    { name: 'Lord Henry', role: 'suspect', isCulprit: true, profilePic: '', backstory: 'A noble with gambling debts. Stole the necklace during dessert. Will deflect suspicion onto Alice.' },
+                    { name: 'Alice', role: 'witness', isCulprit: false, profilePic: '', backstory: 'The maid. Saw Lord Henry near the display but isn’t sure what he did.' },
+                    { name: 'Dr. Watson', role: 'witness', isCulprit: false, profilePic: '', backstory: 'A friend. Heard Lord Henry argue about money earlier.' }
+                ],
+                evidences: [
+                    { name: 'Coat Fibers', description: 'Fibers found near the display match Lord Henry’s coat.', image: '' }
+                ],
+                difficulty: 'easy',
+                timeLimit: 30 * 60,
+                maxQuestions: 15,
+                campaign: 'none'
+            };
+            settingsPanel.style.display = 'none';
+            startGame(tutorialCase);
+        }
+        
+        // Manage Saved Cases
+        document.getElementById('manageCasesBtn').addEventListener('click', function() {
+            const casesHtml = savedCases.map((caseData, index) => `
+                <div class="character-item">
+                    <div class="character-info">
+                        <div class="character-details">
+                            <div class="contact-name">${caseData.title}</div>
+                            <div class="contact-status">Created: ${new Date(caseData.createdAt).toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                    <div class="character-actions">
+                        <button class="action-btn load-case" data-index="${index}">▶️</button>
+                        <button class="action-btn delete-case" data-index="${index}">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+            modalContent.innerHTML = `
+                <span class="close-modal">×</span>
+                <h2>Saved Cases</h2>
+                <div class="character-list">
+                    ${savedCases.length > 0 ? casesHtml : '<p>No saved cases yet.</p>'}
+                </div>
+            `;
+            
+            imageModal.innerHTML = '';
+            imageModal.appendChild(modalContent);
+            
+            modalContent.querySelector('.close-modal').addEventListener('click', () => imageModal.style.display = 'none');
+            
+            modalContent.querySelectorAll('.load-case').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    imageModal.style.display = 'none';
+                    settingsPanel.style.display = 'none';
+                    startGame(savedCases[index]);
+                });
+            });
+            
+            modalContent.querySelectorAll('.delete-case').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    if (confirm(`Delete "${savedCases[index].title}"?`)) {
+                        savedCases.splice(index, 1);
+                        localStorage.setItem('savedCases', JSON.stringify(savedCases));
+                        button.closest('.character-item').remove();
+                        if (savedCases.length === 0) {
+                            modalContent.querySelector('.character-list').innerHTML = '<p>No saved cases yet.</p>';
+                        }
+                    }
+                });
+            });
+            
+            imageModal.style.display = 'flex';
+        });
+    </script>
+</body>
+</html>
