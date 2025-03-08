@@ -1548,12 +1548,39 @@
                 summary: 'A necklace went missing during a dinner party at Lady Margaret’s mansion.',
                 solution: 'Lord Henry stole the necklace to pay off gambling debts, slipping it into his coat pocket during dessert.',
                 characters: [
-                    { name: 'Lord Henry', role: 'suspect', isCulprit: true, profilePic: '', backstory: 'A noble with gambling debts. Stole the necklace during dessert. Will deflect suspicion onto Alice.' },
-                    { name: 'Alice', role: 'witness', isCulprit: false, profilePic: '', backstory: 'The maid. Saw Lord Henry near the display but isn’t sure what he did.' },
-                    { name: 'Dr. Watson', role: 'witness', isCulprit: false, profilePic: '', backstory: 'A friend. Heard Lord Henry argue about money earlier.' }
+                    {
+                        name: 'Lord Henry',
+                        role: 'suspect',
+                        isCulprit: true,
+                        profilePic: 'https://i.imgur.com/i1tZcBH.jpeg',
+                        backstory: 'A noble with gambling debts. Stole the necklace during dessert. Will deflect suspicion onto Alice.'
+                    },
+                    {
+                        name: 'Alice',
+                        role: 'witness',
+                        isCulprit: false,
+                        profilePic: 'https://i.imgur.com/n7TrJRr.jpeg',
+                        backstory: 'The maid. Saw Lord Henry near the display but isn’t sure what he did.'
+                    },
+                    {
+                        name: 'Dr. Watson',
+                        role: 'witness',
+                        isCulprit: false,
+                        profilePic: 'https://i.imgur.com/tu6cSau.jpeg',
+                        backstory: 'A friend. Heard Lord Henry argue about money earlier.'
+                    }
                 ],
                 evidences: [
-                    { name: 'Coat Fibers', description: 'Fibers found near the display match Lord Henry’s coat.', image: '' }
+                    {
+                        name: 'Crime Scene',
+                        description: 'The display case where the necklace was kept.',
+                        image: 'https://i.imgur.com/ywigF0I.jpeg'
+                    },
+                    {
+                        name: 'Coat Fibers',
+                        description: 'Fibers found near the display match Lord Henry’s coat.',
+                        image: ''
+                    }
                 ],
                 difficulty: 'easy',
                 timeLimit: 30 * 60,
